@@ -10,6 +10,9 @@ import phoneIcon from "@/public/assets/icons/phone.svg";
 import SubmitButton from "../SubmitButton";
 import { useState } from "react";
 import { UserFormValidation } from "@/lib/validation";
+import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
+import { createUser } from "@/lib/actions/patient.actions";
 
 export enum FormFieldType {
   INPUT = "input",
@@ -17,7 +20,8 @@ export enum FormFieldType {
   PHONE_INPUT = "phoneInput",
 }
 
-export function PatientForm() {
+export const PatientForm = () => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof UserFormValidation>>({
@@ -29,24 +33,28 @@ export function PatientForm() {
     },
   });
 
-  async function onSubmit({
-    name,
-    email,
-    phone,
-  }: z.infer<typeof UserFormValidation>) {
+  const onSubmit = async (values: z.infer<typeof UserFormValidation>) => {
+    console.log("onsunmittt");
     setIsLoading(true);
+
     try {
-      const userData = {
-        name,
-        email,
-        phone,
+      const user = {
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
       };
 
-      
+      const newUser = await createUser(user);
+
+      if (newUser) {
+        router.push(`/patients/${newUser.$id}/register`);
+      }
     } catch (error) {
       console.log(error);
     }
-  }
+
+    setIsLoading(false);
+  };
 
   return (
     <Form {...form}>
@@ -54,7 +62,7 @@ export function PatientForm() {
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.INPUT}
-          name="Name"
+          name="name"
           label="Full name"
           placeholder="John Doe"
           iconsSrc={userIcon}
@@ -63,23 +71,21 @@ export function PatientForm() {
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.INPUT}
-          name="Email"
+          name="email"
           label="Email address"
           placeholder="examplexyz@gmail.com"
           iconsSrc={emailIcon}
           iconsAlt="emailIcon"
         />
         <CustomFormField
-          control={form.control}
           fieldType={FormFieldType.PHONE_INPUT}
-          name="Contact"
+          control={form.control}
+          name="phone"
           label="Phone number"
-          placeholder="+00 0342 82838"
-          iconsSrc={phoneIcon}
-          iconsAlt="phoneIcon"
+          placeholder="(555) 123-4567"
         />
-        <SubmitButton isLoading={isLoading}>Submit</SubmitButton>
+        <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
       </form>
     </Form>
   );
-}
+};
