@@ -18,6 +18,10 @@ export enum FormFieldType {
   INPUT = "input",
   CHECKBOX = "checkbox",
   PHONE_INPUT = "phoneInput",
+  TEXTAREA = "textarea",
+  SELECT = "select",
+  DATE_PICKER = "calendar",
+  SKELETON = "skeelton"
 }
 
 export const PatientForm = () => {
@@ -58,7 +62,7 @@ export const PatientForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1 ">
         <CustomFormField
           control={form.control}
           fieldType={FormFieldType.INPUT}
