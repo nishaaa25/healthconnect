@@ -19,11 +19,18 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CustomProps {
   control: Control<any>;
@@ -34,13 +41,13 @@ interface CustomProps {
   iconsSrc?: string;
   fieldType: FormFieldType;
   disabled?: boolean;
-  date?: Date;
+  dateFormat?: string;
   showTimeSelect?: boolean;
   children?: React.ReactNode;
   renderSkeleton?: (field: any) => React.ReactNode;
 }
 const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
-  const { fieldType, placeholder, iconsAlt, iconsSrc, date } = props;
+  const { fieldType, placeholder, iconsAlt, iconsSrc, renderSkeleton } = props;
   switch (fieldType) {
     case FormFieldType.INPUT:
       return (
@@ -87,20 +94,58 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           />
         </FormControl>
       );
+    case FormFieldType.CHECKBOX:
+      return (
+        <FormControl>
+          <div className="flex items-center gap-4">
+            <Checkbox
+              id={props.name}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+            <label htmlFor={props.name} className="checkbox-label">
+              {props.label}
+            </label>
+          </div>
+        </FormControl>
+      );
+    case FormFieldType.SKELETON:
+      return renderSkeleton ? renderSkeleton(field) : null;
+    case FormFieldType.SELECT:
+      return (
+        <FormControl>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger className="shad-select-trigger">
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent className="shad-select-content">
+              {props.children}
+            </SelectContent>
+          </Select>
+        </FormControl>
+      );
     case FormFieldType.DATE_PICKER:
       return (
         <FormControl>
           <Popover>
             <PopoverTrigger asChild>
               <Button
-              variant={"outline"}
+                variant={"outline"}
                 className={cn(
-                  "w-[280px] justify-start text-left font-normal shad-input",
+                  "w-full justify-start text-left font-normal shad-input",
                   !field.value && "text-muted-foreground"
                 )}
               >
                 <CalendarIcon className="h-4 w-4 mr-2" />
-                {field.value ? <p className="text-white">{format(new Date(field.value), "PPP")}</p> : <span className="text-dark-600">Pick a date</span>}
+                {field.value ? (
+                  <p className="text-white">
+                    {format(new Date(field.value), "PPP")}
+                  </p>
+                ) : (
+                  <span className="text-dark-600">Pick a date</span>
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-dark-400">
@@ -108,7 +153,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
                 mode="single"
                 initialFocus
                 selected={field.value ? new Date(field.value) : undefined}
-                onSelect={(date)=> field.onChange(date)}
+                onSelect={(date) => field.onChange(date)}
               />
             </PopoverContent>
           </Popover>
